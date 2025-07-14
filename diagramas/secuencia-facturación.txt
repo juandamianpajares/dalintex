@@ -1,0 +1,5 @@
+sequenceDiagram
+    Sistema Stock->>+ZLibra: GET /api/productos (Sincroniza catálogo)
+    ZLibra-->>-Sistema Stock: JSON con IDs compartidos
+    Sistema Stock->>+ZLibra: POST /api/facturar (Envía pedidos ejecutados)
+    ZLibra-->>-Sistema Stock: Confirma facturación (N° de factura)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
+  <packagedElement xmi:type="uml:Class" xmi:id="_User" name="User">
+    <ownedAttribute xmi:id="_User_id" name="id" type="_bigInteger"/>
+    <ownedAttribute xmi:id="_User_name" name="name" type="_string"/>
+    <ownedAttribute xmi:id="_User_email" name="email" type="_string"/>
+    <ownedAttribute xmi:id="_User_password" name="password" type="_string"/>
+    <ownedAttribute xmi:id="_User_role" name="role" type="_enum"/>
+    <ownedAttribute xmi:id="_User_rememberToken" name="rememberToken" type="_string"/>
+  </packagedElement>
+  
+  <packagedElement xmi:type="uml:Class" xmi:id="_Cliente" name="Cliente">
+    <ownedAttribute xmi:id="_Cliente_id" name="id" type="_bigInteger"/>
+    <ownedAttribute xmi:id="_Cliente_nombre" name="nombre" type="_string"/>
+    <ownedAttribute xmi:id="_Cliente_contacto" name="contacto" type="_string"/>
+    <ownedAttribute xmi:id="_Cliente_email" name="email" type="_string"/>
+    <ownedAttribute xmi:id="_Cliente_telefono" name="telefono" type="_string"/>
+    <ownedAttribute xmi:id="_Cliente_direccion" name="direccion" type="_text"/>
+  </packagedElement>
+
+  <!-- Resto de clases con sus atributos -->
+  
+  <!-- Relaciones -->
+  <packagedElement xmi:type="uml:Association" xmi:id="_User_OrdenCompra">
+    <memberEnd xmi:idref="_User_OrdenCompra_user"/>
+    <memberEnd xmi:idref="_User_OrdenCompra_ordenes"/>
+    <ownedEnd xmi:id="_User_OrdenCompra_user" type="_User" association="_User_OrdenCompra" aggregation="none"/>
+    <ownedEnd xmi:id="_User_OrdenCompra_ordenes" type="_OrdenCompra" association="_User_OrdenCompra" aggregation="none" upperValue="*"/>
+  </packagedElement>
+
+  <!-- Resto de relaciones -->
+</uml:Model>

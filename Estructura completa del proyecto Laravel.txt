@@ -1,0 +1,40 @@
+dalintex-stock/
+├── app/
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Cliente.php
+│   │   ├── Producto.php
+│   │   ├── Insumo.php
+│   │   ├── OrdenCompra.php
+│   │   ├── OrdenCompraDetalle.php
+│   │   ├── ProductoInsumo.php
+│   │   ├── MovimientoStock.php
+│   │   ├── PlanProduccion.php
+│   │   └── PlanProduccionDetalle.php
+│   ├── Enums/
+│   │   ├── EstadoOrdenCompra.php
+│   │   ├── TipoInsumo.php
+│   │   ├── TipoMovimientoStock.php
+│   │   └── EstadoPlanProduccion.php
+│   └── ...
+├── database/
+│   ├── migrations/
+│   │   ├── 2023_01_01_000000_create_users_table.php
+│   │   ├── 2023_01_01_000001_create_clientes_table.php
+│   │   ├── 2023_01_01_000002_create_productos_table.php
+│   │   ├── 2023_01_01_000003_create_insumos_table.php
+│   │   ├── 2023_01_01_000004_create_ordenes_compra_table.php
+│   │   ├── 2023_01_01_000005_create_orden_compra_detalles_table.php
+│   │   ├── 2023_01_01_000006_create_producto_insumo_table.php
+│   │   ├── 2023_01_01_000007_create_movimientos_stock_table.php
+│   │   ├── 2023_01_01_000008_create_planes_produccion_table.php
+│   │   └── 2023_01_01_000009_create_plan_produccion_detalles_table.php
+│   └── seeders/
+│       ├── DatabaseSeeder.php
+│       ├── ClientesSeeder.php
+│       ├── InsumosSeeder.php
+│       └── ...
+├── routes/
+│   ├── web.php
+│   └── api.php
+└── ...

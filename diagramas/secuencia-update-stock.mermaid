@@ -1,0 +1,8 @@
+sequenceDiagram
+    Actor Operario
+    Operario->>+App Móvil: Escanea QR
+    App Móvil->>+API DALINTEX: POST /update-stock {qr: "MAD001", cantidad: 100}
+    API DALINTEX->>+DB: UPDATE stock_actual
+    DB-->>-API DALINTEX: Confirmación
+    API DALINTEX-->>-App Móvil: {"status": "success"}
+    App Móvil-->>-Operario: "✔ Stock actualizado"

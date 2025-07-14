@@ -1,0 +1,7 @@
+{
+  "cliente": "VANIPLACE MADO",
+  "items": [
+    { "codigo": "MAD001", "cantidad": 100, "precio_unitario": 1500 }
+  ],
+  "fecha_entrega": "2024-08-30"
+}

@@ -1,0 +1,8 @@
+flowchart TD
+    A[Producción finalizada] --> B{¿Sobran envases?}
+    B -->|Sí| C[Registrar en "Stock Residual VANIPLACE"]
+    B -->|No| D[Cerrar lote]
+    C --> E[Generar informe diario automático]
+    E --> F[Notificar a VANIPLACE vía email/API]
+    F --> G[Retiro físico por VANIPLACE]
+    G --> H[Confirmar retiro en sistema]

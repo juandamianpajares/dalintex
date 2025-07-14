@@ -1,0 +1,120 @@
+classDiagram
+    %% Entidades principales
+    class User {
+        +id: bigInteger
+        +name: string
+        +email: string
+        +password: string
+        +role: enum('admin', 'fabrica', 'deposito')
+        +rememberToken: string
+        +timestamps()
+    }
+
+    class Cliente {
+        +id: bigInteger
+        +nombre: string
+        +contacto: string
+        +email: string
+        +telefono: string
+        +direccion: text
+        +timestamps()
+    }
+
+    class Producto {
+        +id: bigInteger
+        +codigo: string
+        +descripcion: string
+        +unidad_medida: string
+        +cliente_id: bigInteger
+        +timestamps()
+    }
+
+    class Insumo {
+        +id: bigInteger
+        +tipo: enum('frasco', 'tapa', 'etiqueta', 'estuche', 'otro')
+        +codigo: string
+        +descripcion: string
+        +proveedor: string
+        +stock_actual: integer
+        +stock_minimo: integer
+        +ubicacion: string
+        +cliente_sumistrador: string
+        +timestamps()
+    }
+
+    class OrdenCompra {
+        +id: bigInteger
+        +numero: string
+        +fecha: date
+        +cliente_id: bigInteger
+        +estado: enum('pendiente', 'realizable', 'no_realizable', 'ejecutable', 'no_ejecutable', 'completada')
+        +vencimiento_requerido: integer
+        +observaciones: text
+        +condiciones_pago: text
+        +user_id: bigInteger
+        +timestamps()
+    }
+
+    class OrdenCompraDetalle {
+        +id: bigInteger
+        +orden_compra_id: bigInteger
+        +producto_id: bigInteger
+        +cantidad: integer
+        +timestamps()
+    }
+
+    class ProductoInsumo {
+        +id: bigInteger
+        +producto_id: bigInteger
+        +insumo_id: bigInteger
+        +cantidad: integer
+        +timestamps()
+    }
+
+    class MovimientoStock {
+        +id: bigInteger
+        +insumo_id: bigInteger
+        +tipo: enum('ingreso', 'egreso', 'ajuste')
+        +cantidad: integer
+        +orden_compra_id: bigInteger|null
+        +user_id: bigInteger
+        +observaciones: text
+        +timestamps()
+    }
+
+    class PlanProduccion {
+        +id: bigInteger
+        +fecha: date
+        +estado: enum('pendiente', 'en_proceso', 'completado')
+        +user_id: bigInteger
+        +timestamps()
+    }
+
+    class PlanProduccionDetalle {
+        +id: bigInteger
+        +plan_produccion_id: bigInteger
+        +orden_compra_id: bigInteger
+        +prioridad: integer
+        +estado: enum('pendiente', 'en_proceso', 'completado')
+        +timestamps()
+    }
+
+    %% Relaciones
+    User "1" -- "*" OrdenCompra: registra
+    User "1" -- "*" MovimientoStock: realiza
+    User "1" -- "*" PlanProduccion: genera
+
+    Cliente "1" -- "*" Producto: tiene
+    Cliente "1" -- "*" OrdenCompra: genera
+
+    Producto "1" -- "*" ProductoInsumo: contiene
+    Insumo "1" -- "*" ProductoInsumo: se_usa_en
+
+    OrdenCompra "1" -- "*" OrdenCompraDetalle: contiene
+    Producto "1" -- "*" OrdenCompraDetalle: aparece_en
+
+    OrdenCompra "1" -- "*" MovimientoStock: genera
+    Insumo "1" -- "*" MovimientoStock: afecta
+
+    PlanProduccion "1" -- "*" PlanProduccionDetalle: incluye
+    OrdenCompra "1" -- "1" PlanProduccionDetalle: se_planifica_en
