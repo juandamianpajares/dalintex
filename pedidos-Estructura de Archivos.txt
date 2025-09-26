@@ -1,0 +1,11 @@
+resources/
+├── views/
+│   ├── pedidos/
+│   │   ├── index.blade.php          # Listado principal
+│   │   ├── create.blade.php         # Formulario nuevo pedido
+│   │   ├── show.blade.php           # Detalle + gestión
+│   │   ├── partials/
+│   │   │   ├── _estados.blade.php   # Selector de estados
+│   │   │   ├── _items_table.blade.php
+├── js/
+│   ├── pedidos.js                   # Lógica específica

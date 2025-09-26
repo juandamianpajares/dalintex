@@ -1,0 +1,23 @@
+/* resources/css/pedidos.css */
+.card-header h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.item-pedido {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.btn-priorizar {
+    transition: all 0.3s;
+}
+
+.btn-priorizar:hover {
+    transform: scale(1.05);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}

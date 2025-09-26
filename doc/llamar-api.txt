@@ -1,0 +1,4 @@
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{"nombre": "Proveedor Z", "contacto": "Luis", "email": "luis@proveedor.com"}' \
+"http://localhost/tu-proyecto/api.php?action=proveedores"

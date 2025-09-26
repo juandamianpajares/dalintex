@@ -1,0 +1,35 @@
+﻿Estructura del Proyecto DALINTEX
+Este documento detalla la organización de los archivos del sistema, separando las responsabilidades de frontend y backend.
+
+.
+├── api.php                  # API principal para operaciones CRUD de clientes, proveedores, insumos y productos.
+├── css/
+│   └── styles.css           # Hojas de estilo generales.
+├── img/
+│   └── logo-dalintex.png    # Logo de la empresa.
+├── js/
+│   ├── app.js               # Lógica del frontend para ingreso manual y gestión de pedidos.
+│   └── balanza.js           # Lógica para la balanza inteligente y escáner de QR.
+├──
+├── Ingreso_Balanza_Inteligente.html    # Interfaz para el ingreso de artículos con balanza.
+├── Ingreso_de_articulos.html           # Interfaz para el ingreso manual de artículos.
+├── ordenes-compra.html                 # Interfaz para la gestión de órdenes de compra.
+├── dashboard-gerente.html              # Dashboard para el gerente (KPIs y alertas).
+└── dashboard-stock.html                # Dashboard para el encargado de stock (movimientos y alertas operativas).
+│
+└── backend/
+    ├── app/
+    │   ├── Http/
+    │   │   └── Controllers/
+    │   │       ├── DashboardController.php   # Controlador para el dashboard gerencial.
+    │   │       └── StockController.php       # Controlador para el dashboard de stock.
+    │   └── Models/
+    │       ├── Cliente.php                   # Modelo de datos para clientes.
+    │       ├── Insumo.php                    # Modelo de datos para insumos.
+    │       ├── MovimientoStock.php           # Modelo de datos para movimientos de stock.
+    │       ├── OrdenCompra.php               # Modelo de datos para órdenes de compra.
+    │       ├── Producto.php                  # Modelo de datos para productos.
+    │       └── User.php                      # Modelo de datos para usuarios.
+    │
+    └── routes/
+        └── api.php                   # Archivo de rutas de la API.
