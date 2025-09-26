@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Chart.js para gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SweetAlert2 para alertas -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -178,35 +176,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
-            // URL base para las peticiones a la API.
-            // ¡IMPORTANTE! Reemplaza 'http://localhost:8000' con la URL de tu backend.
-            const API_BASE_URL = 'http://localhost:8000/api';
 
-            // Función para obtener todos los datos del dashboard desde la API
-            const fetchDashboardData = async () => {
-                try {
-                    const [insumosRes, ordenesRes, alertasRes, autorizacionesRes] = await Promise.all([
-                        fetch(`${API_BASE_URL}/insumos/stock`).then(res => res.json()),
-                        fetch(`${API_BASE_URL}/ordenes/estado`).then(res => res.json()),
-                        fetch(`${API_BASE_URL}/inventario/alertas`).then(res => res.json()),
-                        fetch(`${API_BASE_URL}/ordenes/autorizaciones`).then(res => res.json())
-                    ]);
+            // --- Simulación de datos de API ---
+            const MOCK_API_DATA = {
+                insumos: [
+                    { nombre: 'Frasco PET', stock: 1200 },
+                    { nombre: 'Tapa Rosca', stock: 2500 },
+                    { nombre: 'Etiqueta', stock: 800 },
+                    { nombre: 'Envase PET', stock: 1500 },
+                    { nombre: 'Caja Cartón', stock: 500 }
+                ],
+                ordenesCompra: [
+                    { estado: 'Pendientes', cantidad: 5 },
+                    { estado: 'Realizables', cantidad: 12 },
+                    { estado: 'No Realizables', cantidad: 3 },
+                    { estado: 'Completadas', cantidad: 25 }
+                ],
+                alertas: [
+                    { insumo: 'Frasco PET 500ml', stock: 200, tipo: 'danger', mensaje: 'por debajo del stock mínimo.' },
+                    { insumo: 'Tapa Rosca Negra', stock: 50, tipo: 'warning', mensaje: 'a punto de agotarse.' },
+                    { insumo: 'Crema Reductora', stock: 0, tipo: 'danger', mensaje: 'sin stock.' }
+                ],
+                autorizacionesPendientes: [
+                    { numero: '#OC-2023-015', cliente: 'Cliente B', sobrante: '150 unid. (Producto X)' },
+                    { numero: '#OC-2023-018', cliente: 'Cliente C', sobrante: '10% del total' },
+                    { numero: '#OC-2023-021', cliente: 'Cliente A', sobrante: '5 unid. (Insumo Z)' }
+                ]
+            };
 
-                    return {
-                        insumos: insumosRes.data,
-                        ordenesCompra: ordenesRes.data,
-                        alertas: alertasRes.data,
-                        autorizacionesPendientes: autorizacionesRes.data
-                    };
-                } catch (error) {
-                    console.error('Error al obtener datos del dashboard:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de conexión',
-                        text: 'No se pudieron cargar los datos del dashboard. Revisa la conexión con el servidor.',
-                    });
-                    return null;
-                }
+            // Simula una llamada a una API real
+            const fetchData = () => {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve(MOCK_API_DATA);
+                    }, 1000); // Simula 1 segundo de latencia de red
+                });
             };
 
             // Función para renderizar las gráficas
@@ -254,10 +258,6 @@
             const renderAlerts = (data) => {
                 const alertasList = document.getElementById('alertas-list');
                 alertasList.innerHTML = '';
-                if (data.alertas.length === 0) {
-                    alertasList.innerHTML = '<li class="list-group-item text-center text-muted">No hay alertas de inventario.</li>';
-                    return;
-                }
                 data.alertas.forEach(alerta => {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
@@ -273,10 +273,6 @@
             const renderAuthorizations = (data) => {
                 const autorizacionesTable = document.getElementById('autorizaciones-table');
                 autorizacionesTable.innerHTML = '';
-                if (data.autorizacionesPendientes.length === 0) {
-                    autorizacionesTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay autorizaciones pendientes.</td></tr>';
-                    return;
-                }
                 data.autorizacionesPendientes.forEach(auth => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -284,34 +280,18 @@
                         <td>${auth.cliente}</td>
                         <td>${auth.sobrante}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary btn-action" data-orden-numero="${auth.numero}"><i class="bi bi-eye"></i> Revisar</button>
+                            <button class="btn btn-sm btn-primary btn-action"><i class="bi bi-eye"></i> Revisar</button>
                         </td>
                     `;
                     autorizacionesTable.appendChild(row);
                 });
-
-                // Añadir event listeners a los nuevos botones
-                autorizacionesTable.querySelectorAll('.btn-action').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const ordenNumero = e.target.closest('button').dataset.ordenNumero;
-                        Swal.fire({
-                            title: `Revisar Orden ${ordenNumero}`,
-                            text: `Lógica para revisar esta orden de compra y autorizar el sobrante.`,
-                            icon: 'info',
-                            confirmButtonText: 'OK'
-                        });
-                        // Aquí iría la lógica para redirigir al detalle de la orden o abrir un modal
-                    });
-                });
             };
 
             // Cargar y renderizar todo el dashboard
-            const data = await fetchDashboardData();
-            if (data) {
-                renderCharts(data);
-                renderAlerts(data);
-                renderAuthorizations(data);
-            }
+            const data = await fetchData();
+            renderCharts(data);
+            renderAlerts(data);
+            renderAuthorizations(data);
         });
     </script>
 </body>
