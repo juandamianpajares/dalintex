@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DALINTEX | Ingreso con Balanza</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-primary {
+            background-color: #007bff !important;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navbar (para una apariencia consistente) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://placehold.co/30x30/212529/FFFFFF?text=Logo" height="30" alt="DALINTEX">
+            </a>
+            <span class="navbar-text text-white">Ingreso de Artículos</span>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container mt-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">Ingreso con Balanza Inteligente</h5>
+
+                <!-- Sección de Conexión y Estado -->
+                <div class="text-center mb-4">
+                    <div id="status-display" class="alert alert-secondary mb-3">
+                        <i class="bi bi-x-circle-fill text-danger me-2"></i> Estado: Desconectado
+                    </div>
+                    <button id="connect-button" class="btn btn-primary">
+                        <i class="bi bi-usb-drive me-2"></i> Conectar Balanza
+                    </button>
+                    <button id="calibrate-button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-calibracion" style="display:none;">
+                        <i class="bi bi-tools me-2"></i> Calibrar
+                    </button>
+                </div>
+
+                <!-- Controles de Pesaje e Ingreso -->
+                <div id="weighing-section" style="display: none;">
+                    <div class="text-center mb-4">
+                        <h1 id="weight-display" class="display-1 fw-bold">0.00</h1>
+                        <p class="h3 text-muted">gramos</p>
+                    </div>
+
+                    <form id="stock-form" class="row g-3">
+                        <div class="col-12">
+                            <label for="insumo-select" class="form-label">Insumo</label>
+                            <select id="insumo-select" class="form-select" required>
+                                <option value="" disabled selected>Seleccione un insumo</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="origen-input" class="form-label">Origen</label>
+                            <input type="text" id="origen-input" class="form-control" placeholder="Ej: Sobrante de producción" required>
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="submit" id="save-button" class="btn btn-success mt-3 w-75">
+                                <i class="bi bi-save me-2"></i> Registrar Stock
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Calibración -->
+    <div class="modal fade" id="modal-calibracion" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Calibrar Balanza</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Peso conocido (gramos)</label>
+                        <input type="number" class="form-control" id="peso-conocido" step="0.01" placeholder="Ej: 100 (para 100g)">
+                    </div>
+                    <button id="btn-confirm-calibracion" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Aplicar Calibración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const connectButton = document.getElementById('connect-button');
+            const calibrateButton = document.getElementById('calibrate-button');
+            const statusDisplay = document.getElementById('status-display');
+            const weighingSection = document.getElementById('weighing-section');
+            const weightDisplay = document.getElementById('weight-display');
+            const insumoSelect = document.getElementById('insumo-select');
+            const origenInput = document.getElementById('origen-input');
+            const saveButton = document.getElementById('save-button');
+            const pesoConocidoInput = document.getElementById('peso-conocido');
+            const confirmCalibracionButton = document.getElementById('btn-confirm-calibracion');
+
+            let port;
+            let reader;
+            let calibrationOffset = 0;
+            const API_URL = 'http://localhost:8000/api';
+
+            async function getInsumos() {
+                try {
+                    const response = await fetch(`${API_URL}/insumos`);
+                    const insumos = await response.json();
+                    insumos.forEach(insumo => {
+                        const option = document.createElement('option');
+                        option.value = insumo.id;
+                        option.textContent = `${insumo.codigo} - ${insumo.descripcion}`;
+                        insumoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al obtener los insumos:', error);
+                    Swal.fire('Error', 'Error al cargar insumos. Verifique la conexión con la API.', 'error');
+                }
+            }
+
+            async function connectSerial() {
+                try {
+                    port = await navigator.serial.requestPort();
+                    await port.open({ baudRate: 9600 });
+                    
+                    statusDisplay.innerHTML = `<i class="bi bi-check-circle-fill text-success me-2"></i> Estado: Conectado`;
+                    statusDisplay.classList.remove('alert-secondary');
+                    statusDisplay.classList.add('alert-success');
+                    weighingSection.style.display = 'block';
+                    calibrateButton.style.display = 'inline-block';
+
+                    reader = port.readable.getReader();
+                    readData();
+                    Swal.fire('Conectado', 'Balanza conectada correctamente.', 'success');
+                } catch (error) {
+                    console.error('Error de conexión:', error);
+                    statusDisplay.innerHTML = `<i class="bi bi-x-circle-fill text-danger me-2"></i> Estado: Desconectado`;
+                    statusDisplay.classList.remove('alert-success');
+                    statusDisplay.classList.add('alert-secondary');
+                    Swal.fire('Error', 'Error al conectar con la balanza. Asegúrate de que esté conectada y los permisos concedidos.', 'error');
+                }
+            }
+
+            async function readData() {
+                const decoder = new TextDecoder();
+                while (true) {
+                    try {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            console.log('Lectura terminada.');
+                            break;
+                        }
+                        const text = decoder.decode(value);
+                        const weightMatch = text.match(/[-]?\s*(\d+\.\d+)\s*g/);
+                        if (weightMatch && weightMatch[1]) {
+                            let rawWeight = parseFloat(weightMatch[1]);
+                            let calibratedWeight = rawWeight + calibrationOffset;
+                            weightDisplay.textContent = calibratedWeight.toFixed(2);
+                        }
+                    } catch (error) {
+                        console.error('Error al leer datos del puerto serial:', error);
+                        break;
+                    }
+                }
+            }
+
+            confirmCalibracionButton.addEventListener('click', () => {
+                const pesoConocido = parseFloat(pesoConocidoInput.value);
+                const pesoActual = parseFloat(weightDisplay.textContent);
+
+                if (isNaN(pesoConocido)) {
+                    Swal.fire('Error', 'Por favor, ingrese un peso conocido válido.', 'error');
+                    return;
+                }
+
+                calibrationOffset = pesoConocido - pesoActual;
+                Swal.fire('Calibración Exitosa', 'La balanza ha sido calibrada. El offset es: ' + calibrationOffset.toFixed(2) + 'g', 'success');
+                // Cerrar el modal
+                bootstrap.Modal.getInstance(document.getElementById('modal-calibracion')).hide();
+            });
+
+            saveButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const insumo_id = insumoSelect.value;
+                const cantidad = parseFloat(weightDisplay.textContent);
+                const origen = origenInput.value;
+
+                if (!insumo_id || !cantidad || !origen || cantidad <= 0) {
+                    Swal.fire('Error', 'Por favor, asegúrate de que el peso sea mayor a 0 y que todos los campos estén completos.', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${API_URL}/stock-residual`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            insumo_id: insumo_id,
+                            cantidad: cantidad,
+                            origen: origen,
+                            autorizado_por: 1 // TODO: Reemplazar con ID de usuario real
+                        }),
+                    });
+
+                    if (response.ok) {
+                        Swal.fire('Éxito', 'Stock residual registrado con éxito.', 'success');
+                        // Opcional: limpiar campos
+                        insumoSelect.value = '';
+                        origenInput.value = '';
+                        weightDisplay.textContent = '0.00';
+                    } else {
+                        const errorData = await response.json();
+                        Swal.fire('Error', `Error al registrar stock: ${errorData.error || 'Error desconocido'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al enviar datos a la API:', error);
+                    Swal.fire('Error de red', 'No se pudo conectar con la API.', 'error');
+                }
+            });
+
+            connectButton.addEventListener('click', connectSerial);
+
+            getInsumos();
+        });
+    </script>
+</body>
+</html>
