@@ -1,8 +1,8 @@
-version: '3.8'
+ï»¿version: '3.8'
 
 services:
   # ----------------------------------------------------
-  # Servicio de Aplicación (PHP-FPM)
+  # Servicio de AplicaciÃ³n (PHP-FPM)
   # ----------------------------------------------------
   app:
     # Construye la imagen usando el Dockerfile en el directorio actual
@@ -10,16 +10,16 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: dalintex-app
-    # Monta el código fuente en el contenedor
+    # Monta el cÃ³digo fuente en el contenedor
     volumes:
       - .:/var/www/html
-    # Depende de que la base de datos esté lista
+    # Depende de que la base de datos estÃ© lista
     depends_on:
       - db
     # Usa variables de entorno del archivo .env
     env_file:
       - .env
-    # Red interna para comunicación entre contenedores
+    # Red interna para comunicaciÃ³n entre contenedores
     networks:
       - dalintex-network
 
@@ -29,12 +29,12 @@ services:
   nginx:
     image: nginx:stable-alpine
     container_name: dalintex-nginx
-    # Monta el código y un archivo de configuración de Nginx
+    # Monta el cÃ³digo y un archivo de configuraciÃ³n de Nginx
     volumes:
       - .:/var/www/html
-      # Archivo de configuración de Nginx (debe crearse este archivo)
+      # Archivo de configuraciÃ³n de Nginx (debe crearse este archivo)
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-    # Mapea el puerto 80 del contenedor al puerto 8080 de tu máquina host
+    # Mapea el puerto 80 del contenedor al puerto 8080 de tu mÃ¡quina host
     ports:
       - "8080:80"
     depends_on:
@@ -60,7 +60,7 @@ services:
       - dalintex-network
 
 # ----------------------------------------------------
-# Redes y Volúmenes
+# Redes y VolÃºmenes
 # ----------------------------------------------------
 networks:
   dalintex-network:
