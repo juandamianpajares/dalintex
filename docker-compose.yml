@@ -10,7 +10,7 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: laravel-app
-        # Monta el código fuente en el contenedor
+        # Monta el c�digo fuente en el contenedor
         volumes:
             - .:/var/www/html
         # Instala dependencias de Composer al inicio del contenedor.
@@ -24,26 +24,24 @@ services:
         restart: unless-stopped
         user: "appuser" # Ejecuta PHP-FPM con el usuario no-root definido en el Dockerfile
 
-    # ---------------------------------------------
-    # 2. Nginx (Servicio 'web')
-    # Servidor web que sirve la aplicación Laravel.
-    # ---------------------------------------------
-    web:
-        image: nginx:stable-alpine
-        container_name: laravel-nginx
-        volumes:
-            # Monta el código de la aplicación para que Nginx lo sirva
-            - .:/var/www/html
-            # Monta el archivo de configuración de Nginx
-            - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
-        # Expone el puerto 80 del contenedor al puerto 8000 de tu máquina host
-        ports:
-            - "8000:80"
-        networks:
-            - laravel-network
-        depends_on:
-            - app
-        restart: unless-stopped
+  # ----------------------------------------------------
+  # Servicio Web (Nginx)
+  # ----------------------------------------------------
+  nginx:
+    image: nginx:stable-alpine
+    container_name: dalintex-nginx
+    # Monta el c�digo y un archivo de configuraci�n de Nginx
+    volumes:
+      - .:/var/www/html
+      # Archivo de configuraci�n de Nginx (debe crearse este archivo)
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+    # Mapea el puerto 80 del contenedor al puerto 8080 de tu m�quina host
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    networks:
+      - dalintex-network
 
     # ---------------------------------------------
     # 3. MySQL (Servicio 'db')
@@ -68,11 +66,11 @@ services:
             - laravel-network
         restart: unless-stopped
 
-# Definición de volúmenes persistentes
+# Definici�n de vol�menes persistentes
 volumes:
     db-data:
 
-# Definición de la red interna
+# Definici�n de la red interna
 networks:
     laravel-network:
         driver: bridge
