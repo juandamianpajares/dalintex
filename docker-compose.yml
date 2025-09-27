@@ -29,12 +29,12 @@ services:
   nginx:
     image: nginx:stable-alpine
     container_name: dalintex-nginx
-    # Monta el código y un archivo de configuración de Nginx
+    # Monta el código y un archivo de configuracioon de Nginx
     volumes:
       - .:/var/www/html
       # Archivo de configuración de Nginx (debe crearse este archivo)
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-    # Mapea el puerto 80 del contenedor al puerto 8080 de tu máquina host
+    # Mapea el puerto 80 del contenedor al puerto 8080 de tu maquina host
     ports:
       - "8080:80"
     depends_on:
