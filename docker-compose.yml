@@ -1,37 +1,70 @@
-# Usamos una imagen base de PHP-FPM optimizada
-FROM php:8.2-fpm
+version: '3.8'
 
-# Instalamos dependencias del sistema necesarias
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libpq-dev \
-    libzip-dev \
-    libonig-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libwebp-dev \
-    libfreetype6-dev \
-    wget \
-    curl \
-    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+services:
+  # ----------------------------------------------------
+  # Servicio de Aplicación (PHP-FPM)
+  # ----------------------------------------------------
+  app:
+    # Construye la imagen usando el Dockerfile en el directorio actual
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dalintex-app
+    # Monta el código fuente en el contenedor
+    volumes:
+      - .:/var/www/html
+    # Depende de que la base de datos esté lista
+    depends_on:
+      - db
+    # Usa variables de entorno del archivo .env
+    env_file:
+      - .env
+    # Red interna para comunicación entre contenedores
+    networks:
+      - dalintex-network
 
-# Instalamos extensiones de PHP comunes para Laravel
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
-RUN docker-php-ext-install pdo pdo_mysql zip opcache gd
+  # ----------------------------------------------------
+  # Servicio Web (Nginx)
+  # ----------------------------------------------------
+  nginx:
+    image: nginx:stable-alpine
+    container_name: dalintex-nginx
+    # Monta el código y un archivo de configuración de Nginx
+    volumes:
+      - .:/var/www/html
+      # Archivo de configuración de Nginx (debe crearse este archivo)
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+    # Mapea el puerto 80 del contenedor al puerto 8080 de tu máquina host
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    networks:
+      - dalintex-network
 
-# Instalamos Composer (administrador de dependencias de PHP)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+  # ----------------------------------------------------
+  # Servicio de Base de Datos (MySQL)
+  # ----------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: dalintex-mysql
+    # Mapea un volumen para persistir los datos de la base de datos
+    volumes:
+      - db-data:/var/lib/mysql
+    # Usa variables de entorno del archivo .env
+    env_file:
+      - .env
+    # Reinicia si falla
+    restart: always
+    networks:
+      - dalintex-network
 
-# Configuramos el usuario para evitar problemas de permisos
-RUN useradd -ms /bin/bash appuser
-USER appuser
+# ----------------------------------------------------
+# Redes y Volúmenes
+# ----------------------------------------------------
+networks:
+  dalintex-network:
+    driver: bridge
 
-# Definimos el directorio de trabajo dentro del contenedor
-WORKDIR /var/www/html
-
-# Exponemos el puerto de PHP-FPM (usado internamente por Nginx)
-EXPOSE 9000
-
-# Comando por defecto para iniciar PHP-FPM
-CMD ["php-fpm"]
+volumes:
+  db-data:
