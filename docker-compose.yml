@@ -1,11 +1,9 @@
-﻿version: '3.8'
-
-services:
+﻿services:
     # ---------------------------------------------
     # 1. PHP-FPM (Servicio 'app')
     # Utiliza el Dockerfile para construir la imagen.
     # ---------------------------------------------
-    app:
+  app:
         build:
             context: .
             dockerfile: Dockerfile
@@ -20,7 +18,7 @@ services:
         ports:
             - "9000:9000"
         networks:
-            - laravel-network
+            - dalintex-network
         restart: unless-stopped
         user: "appuser" # Ejecuta PHP-FPM con el usuario no-root definido en el Dockerfile
 
@@ -47,7 +45,7 @@ services:
     # 3. MySQL (Servicio 'db')
     # Base de datos. Los datos persisten en el volumen 'db-data'.
     # ---------------------------------------------
-    db:
+  db:
         image: mysql:8.0
         container_name: laravel-mysql
         environment:
@@ -63,7 +61,7 @@ services:
         ports:
             - "3306:3306"
         networks:
-            - laravel-network
+            - dalintex-network
         restart: unless-stopped
 
 # Definici�n de vol�menes persistentes
@@ -72,5 +70,5 @@ volumes:
 
 # Definici�n de la red interna
 networks:
-    laravel-network:
-        driver: bridge
+   dalintex-network:
+    driver: bridge
